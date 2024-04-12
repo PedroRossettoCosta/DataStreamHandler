@@ -11,53 +11,46 @@ db.init_app(app)
 
 @app.route('/add_data', methods=['POST'])
 def add_data():
-    # Extract data from the request
+    # Extracts the JSON data from the request body using Flask
     data = request.json
+    # These next lines extract specific data fields from the JSON data received in the request
     equipmentId = data['equipmentId']
     timestamp = data['timestamp']
     timestamp = datetime.strptime(data['timestamp'], "%Y-%m-%dT%H:%M:%S.%f%z")
     value = float(data['value'])
 
-    # Create a new DataSensor object and add it to the database
+    # Creates a new datasensor object with the extracted data and adds it to the dabase session
     new_data = DataSensor(equipmentId=equipmentId, timestamp=timestamp, value=value)
     db.session.add(new_data)
+    # Commits the cahnges to the database
     db.session.commit()
+    # This line returns a JSON response with a success message indicating that the data was added
+    # successfully to the database
+    return jsonify({'message': 'Data added successfully'}), 201 # Responds with 201 status code (Created) to indicate successful creation of a new resource
 
-    return jsonify({'message': 'Data added successfully'}), 201
-
-@app.route('/add_csv_data', methods=['POST'])
+@app.route('/add_csv_data', methods=['GET', 'POST'])
 def add_csv_data():
     if request.method == 'POST':
-        # Verificar se o arquivo CSV foi enviado na requisição
         if 'file' not in request.files:
             return jsonify({'error': 'No file part'}), 400
 
         file = request.files['file']
-
-        # Verificar se o arquivo tem um nome e uma extensão válidos
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
 
         if file and file.filename.endswith('.csv'):
-            # Ler o arquivo CSV utilizando o Pandas
             csv_data = pd.read_csv(file)
-            
-            # Iterar sobre as linhas do DataFrame e adicionar os dados ao banco de dados
-            for index, row in csv_data.iterrows():
-                equipmentId = row['equipmentId']
-                timestamp = datetime.strptime(row['timestamp'], "%Y-%m-%dT%H:%M:%S.%f%z")
-                value = float(row['value'])
-
-                new_faulty_data = FaultySensorData(equipmentId=equipmentId, timestamp=timestamp, value=value)
-                db.session.add(new_faulty_data)
-                db.session.commit()
-
-            return jsonify({'message': 'CSV data added successfully'}), 201
+            # Process the CSV data as needed
+            # For example, perform analysis or manipulation
+            response_data = {
+            'message' : 'CSV data processed successfully',
+            'data' : csv_data.to_dict(orient='records') # Converts DataFrame to dictionary for JSON response
+        }
+            return jsonify(response_data), 200
         else:
             return jsonify({'error': 'Invalid file format, only CSV files are accepted'}), 400
 
     elif request.method == 'GET':
-        # Renderizar o formulário HTML para enviar o arquivo CSV
         return render_template('upload_csv.html')
 
 
