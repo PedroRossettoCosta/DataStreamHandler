@@ -9,7 +9,7 @@ db.init_app(app)
 
 
 
-@app.route('/add_data', methods=['POST'])
+@app.route('/add_data', methods=['GET','POST'])
 def add_data():
     # Extracts the JSON data from the request body using Flask
     data = request.json
@@ -17,6 +17,7 @@ def add_data():
     equipmentId = data['equipmentId']
     timestamp = data['timestamp']
     timestamp = datetime.strptime(data['timestamp'], "%Y-%m-%dT%H:%M:%S.%f%z")
+
      #fazer tratamento para poder receber valor nulo
     if 'value' in data and data['value'] is not None:
         #If it exists, convert it to float
@@ -54,12 +55,37 @@ def add_csv_data():
             'message' : 'CSV data processed successfully',
             'data' : csv_data.to_dict(orient='records') # Converts DataFrame to dictionary for JSON response
         }
+            
+            null_values_response, status_code = find_null_values()
+            response_data['null_values'] = null_values_response
+
             return jsonify(response_data), 200
         else:
             return jsonify({'error': 'Invalid file format, only CSV files are accepted'}), 400
 
     elif request.method == 'GET':
         return render_template('upload_csv.html')
+    
+    return find_null_values()
+
+
+def find_null_values():
+    # Query the database for records where the 'value' field is null
+    null_value_records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
+    
+    # Convert the records to a list of dictionaries for JSON response
+    null_value_records_dict = [
+        {
+            'id': record.id,
+            'equipmentId': record.equipmentId,
+            'timestamp': record.timestamp.isoformat(),  # Convert timestamp to ISO format string
+            'value': record.value  # Leave value as None if it's null
+        }
+        for record in null_value_records
+    ]
+    
+    
+    return null_value_records_dict, 200
 
 
 if __name__ == '__main__':

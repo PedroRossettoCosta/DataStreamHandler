@@ -9,4 +9,3 @@ class DataSensor(db.Model):
     equipmentId = db.Column(db.String(255),nullable = False)
     timestamp = db.Column(db.DateTime,nullable = False)
     value = db.Column(db.Numeric(precision=10, scale=2),nullable = True)
-
