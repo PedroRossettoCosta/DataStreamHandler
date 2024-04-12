@@ -17,12 +17,18 @@ def add_data():
     equipmentId = data['equipmentId']
     timestamp = data['timestamp']
     timestamp = datetime.strptime(data['timestamp'], "%Y-%m-%dT%H:%M:%S.%f%z")
-    value = float(data['value'])
+     #fazer tratamento para poder receber valor nulo
+    if 'value' in data and data['value'] is not None:
+        #If it exists, convert it to float
+        value = float(data['value'])
+    else:
+        # If it doesn't exist or is null, set value to None
+        value = None
 
     # Creates a new datasensor object with the extracted data and adds it to the dabase session
     new_data = DataSensor(equipmentId=equipmentId, timestamp=timestamp, value=value)
     db.session.add(new_data)
-    # Commits the cahnges to the database
+    # Commits the changes to the database
     db.session.commit()
     # This line returns a JSON response with a success message indicating that the data was added
     # successfully to the database
@@ -31,10 +37,12 @@ def add_data():
 @app.route('/add_csv_data', methods=['GET', 'POST'])
 def add_csv_data():
     if request.method == 'POST':
+        
         if 'file' not in request.files:
             return jsonify({'error': 'No file part'}), 400
 
         file = request.files['file']
+        # Verifying if a file has been added
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
 
