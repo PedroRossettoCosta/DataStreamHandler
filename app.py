@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, session
 from database import db, DataSensor
 from datetime import datetime
 import pandas as pd
 import webbrowser
 import os
+import csv
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:pC1596321471307!@localhost/dbDataStreamHandler'
@@ -40,50 +41,74 @@ def add_data():
     # successfully to the database
     return jsonify({'message': 'Data added successfully'}), 201 # Responds with 201 status code (Created) to indicate successful creation of a new resource
 
+import csv
+
 @app.route('/add_csv_data', methods=['GET', 'POST'])
 def add_csv_data():
     if request.method == 'POST':
-        
         if 'file' not in request.files:
             return jsonify({'error': 'No file part'}), 400
 
         file = request.files['file']
-        # Verifying if a file has been added
+        
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
 
         if file and file.filename.endswith('.csv'):
-            csv_data = pd.read_csv(file)
-            # Process the CSV data as needed
-            # For example, perform analysis or manipulation
-            response_data = {
-            'message' : 'CSV data processed successfully',
-            'data' : csv_data.to_dict(orient='records') # Converts DataFrame to dictionary for JSON response
-        }
             
+            csv_data = pd.read_csv(file, sep=',', skipinitialspace=True)
 
-            return jsonify(response_data), 200
+            updated_records = update_database_from_csv(csv_data)
+            
+            return jsonify({'message': 'CSV data processed successfully', 'updated_records': updated_records}), 200
         else:
             return jsonify({'error': 'Invalid file format, only CSV files are accepted'}), 400
 
     elif request.method == 'GET':
         return render_template('upload_csv.html')
+
+def update_database_from_csv(csv_data):
+
+    print("Processing CSV Data:")
+    print(csv_data)
+
+   # Query the database for records with matching equipmentId and null value
+    records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
+   
+    null_ids = {(record.equipmentId):record for record in records}
+    
+    print("records:")
+    print(records)
+
+    print("equipment:")
+    print(null_ids)
+
+    print()
+
+    for _, row in csv_data.iterrows():
+        equipmentId = row['equipmentId']
+        value = float(row['value'])
+
+        print(f"Processing equipmentId: {equipmentId}, value: {value}")
+
+        if equipmentId in null_ids:
+            record = null_ids[(equipmentId)]
+            print(f"Updating record with equipmentId: {equipmentId} to value: {value}")
+            record.value = value
+        else:
+            print(f"No matching record found for equipmentId: {equipmentId}")
+
+    db.session.commit()
+    
+    return "foi caralho porra de merda de trabalho filho da puta sem mae fudido"
+
     
 
 
 @app.route('/find_null_values', methods=['GET'])
 def find_null_values():
-    if request.method == 'POST':
-        data = request.json
-        updated_records = compare_and_update_values(data)
-
-        # Print the updated records to the terminal
-        print(updated_records)
-
-        return jsonify({'message': 'Null values updated successfully', 'updated_records': updated_records}), 200
-    else:
         # Query the database for records where the 'value' field is null
-        null_value_records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
+    null_value_records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
 
     null_value_records_dict = [
         {
@@ -102,40 +127,7 @@ def find_null_values():
 def graficos():
     pass
 
-@app.route('/compare_and_update_values', methods=['GET','POST'])
-def compare_and_update_values(data):
-    # Query the database for records where the 'value' field is null
-    null_value_records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
 
-    # Create a dictionary to map record IDs to their values
-    null_value_map = {record.id: record.value for record in null_value_records}
-
-    # List to hold updated records
-    updated_records = []
-
-    # Iterate through the client's data
-    for item in data:
-        record_id = item['id']
-
-        # Check if the record ID is in the null_value_map
-        if record_id in null_value_map:
-            # Update the value in the database
-            updated_record = DataSensor.query.get(record_id)
-            updated_record.value = item['value']
-            db.session.commit()
-
-            # Update the record in the null_value_map
-            null_value_map[record_id] = item['value']
-
-            # Append the updated record to the list
-            updated_records.append({
-                'id': record_id,
-                'equipmentId': updated_record.equipmentId,
-                'timestamp': updated_record.timestamp.isoformat(),
-                'value': item['value']
-            })
-
-    return updated_records
 
 if __name__ == '__main__':
      #Iniciando o servidor
