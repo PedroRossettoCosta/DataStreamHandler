@@ -56,8 +56,8 @@ def add_csv_data():
             'data' : csv_data.to_dict(orient='records') # Converts DataFrame to dictionary for JSON response
         }
             
-            null_values_response, status_code = find_null_values()
-            response_data['null_values'] = null_values_response
+            find_null_values()
+            
 
             return jsonify(response_data), 200
         else:
@@ -84,8 +84,11 @@ def find_null_values():
         for record in null_value_records
     ]
     
+    # Print the null values to the terminal
+    print(null_value_records_dict)
     
-    return null_value_records_dict, 200
+    # Return a status code indicating success
+    return jsonify({'message': 'Null values retrieved successfully'}), 200
 
 
 if __name__ == '__main__':
