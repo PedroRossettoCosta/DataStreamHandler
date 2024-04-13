@@ -73,10 +73,18 @@ def add_csv_data():
 
 @app.route('/find_null_values', methods=['GET'])
 def find_null_values():
-    # Query the database for records where the 'value' field is null
-    null_value_records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
-    
-    # Convert the records to a list of dictionaries for JSON response
+    if request.method == 'POST':
+        data = request.json
+        updated_records = compare_and_update_values(data)
+
+        # Print the updated records to the terminal
+        print(updated_records)
+
+        return jsonify({'message': 'Null values updated successfully', 'updated_records': updated_records}), 200
+    else:
+        # Query the database for records where the 'value' field is null
+        null_value_records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
+
     null_value_records_dict = [
         {
             'id': record.id,
@@ -94,6 +102,40 @@ def find_null_values():
 def graficos():
     pass
 
+@app.route('/compare_and_update_values', methods=['GET','POST'])
+def compare_and_update_values(data):
+    # Query the database for records where the 'value' field is null
+    null_value_records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
+
+    # Create a dictionary to map record IDs to their values
+    null_value_map = {record.id: record.value for record in null_value_records}
+
+    # List to hold updated records
+    updated_records = []
+
+    # Iterate through the client's data
+    for item in data:
+        record_id = item['id']
+
+        # Check if the record ID is in the null_value_map
+        if record_id in null_value_map:
+            # Update the value in the database
+            updated_record = DataSensor.query.get(record_id)
+            updated_record.value = item['value']
+            db.session.commit()
+
+            # Update the record in the null_value_map
+            null_value_map[record_id] = item['value']
+
+            # Append the updated record to the list
+            updated_records.append({
+                'id': record_id,
+                'equipmentId': updated_record.equipmentId,
+                'timestamp': updated_record.timestamp.isoformat(),
+                'value': item['value']
+            })
+
+    return updated_records
 
 if __name__ == '__main__':
      #Iniciando o servidor
