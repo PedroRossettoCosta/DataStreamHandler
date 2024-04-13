@@ -2,11 +2,16 @@ from flask import Flask, jsonify, request, render_template
 from database import db, DataSensor
 from datetime import datetime
 import pandas as pd
+import webbrowser
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:pC1596321471307!@localhost/dbDataStreamHandler'
 db.init_app(app)
 
+@app.route('/', methods=['GET','POST'])
+def home_screen():
+    return render_template('home.html')
 
 
 @app.route('/add_data', methods=['GET','POST'])
@@ -56,8 +61,6 @@ def add_csv_data():
             'data' : csv_data.to_dict(orient='records') # Converts DataFrame to dictionary for JSON response
         }
             
-            find_null_values()
-            
 
             return jsonify(response_data), 200
         else:
@@ -66,9 +69,9 @@ def add_csv_data():
     elif request.method == 'GET':
         return render_template('upload_csv.html')
     
-    return find_null_values()
 
 
+@app.route('/find_null_values', methods=['GET'])
 def find_null_values():
     # Query the database for records where the 'value' field is null
     null_value_records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
@@ -85,11 +88,16 @@ def find_null_values():
     ]
     
     # Print the null values to the terminal
-    print(null_value_records_dict)
-    
-    # Return a status code indicating success
-    return jsonify({'message': 'Null values retrieved successfully'}), 200
+    return render_template('null_values.html', null_values=null_value_records_dict)
+
+@app.route('/graficos', methods=['GET','POST'])
+def graficos():
+    pass
 
 
 if __name__ == '__main__':
+     #Iniciando o servidor
+    if not os.environ.get("WERKZEUG_RUN_MAIN"): #Executa apenas uma vez
+        webbrowser.open("http://127.0.0.1:5000/")
+
     app.run(debug=True)
