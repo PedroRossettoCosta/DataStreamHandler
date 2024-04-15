@@ -1,14 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Graph Options</title>
+    <style>
+        /* Center align the content */
+        body {
+            text-align: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Style for the welcome message container */
+        .graphs-container {
+            display: block;
+            border: 2px solid #333; /* Blue border */
+            padding: 20px; /* Padding inside the container */
+            margin-top: 50px; /* Margin at the top */
+            margin-bottom: 20px; /* Margin at the bottom */
+            max-width: 45%; /* Limit the maximum width of the container */
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+        }
+
+        /* Style for the buttons container */
+        .buttons-container {
+            display: block;
+            border: 2px solid #333; /* Blue border */
+            padding: 20px; /* Padding inside the container */
+            max-width: 45%; /* Limit the maximum width of the container */
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+        }
+
+        /* Style for the buttons */
+        button {
+            display: block;
+            margin: 10px auto; /* Center align the buttons */
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .buttons-container button {
+            display: block;
+            margin: 10px auto; /* Center align the buttons */
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 15px; /* Rounded corners */
+            border: none; /* Remove default button border */
+            background-color: #555555; /* Button background color */
+            color: #ffffff; /* Text color */
+        }
+
+        .buttons-container button:hover {
+            background-color: #292929; /* Darker background color on hover */
+        }
+
+        /* Increase font size for the welcoming message */
+        h1 {
+            font-size: 24px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Select Time Range</h1>
-    <button onclick="window.location.href='/graphs/24hours'">24 Hours</button>
-    <button onclick="window.location.href='/graphs/48hours'">48 Hours</button>
-    <button onclick="window.location.href='/graphs/1week'">1 Week</button>
-    <button onclick="window.location.href='/graphs/1month'">1 Month</button>
+    <div class="graphs-container">
+        <h1>Select Time Range</h1>
+    </div>
+
+    <div class="buttons-container">
+        <button onclick="window.location.href='/graphs/24hours'">24 Hours</button>
+        <button onclick="window.location.href='/graphs/48hours'">48 Hours</button>
+        <button onclick="window.location.href='/graphs/1week'">1 Week</button>
+        <button onclick="window.location.href='/graphs/1month'">1 Month</button>
+    </div>
 </body>
 </html>
