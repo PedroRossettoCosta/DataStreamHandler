@@ -1,10 +1,10 @@
 from flask import Flask, jsonify, request, render_template, session
 from database import db, DataSensor
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import webbrowser
 import os
-import csv
+import plotly.graph_objs as go
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:pC1596321471307!@localhost/dbDataStreamHandler'
@@ -122,9 +122,53 @@ def find_null_values():
     # Print the null values to the terminal
     return render_template('null_values.html', null_values=null_value_records_dict)
 
-@app.route('/graficos', methods=['GET','POST'])
-def graficos():
-    pass
+@app.route('/graphs', methods=['GET','POST'])
+def graphs():
+    return render_template('graphs.html')
+
+def get_average_values_by_time_range(time_range):
+    end_time = datetime.now()
+    if time_range == '24hours':
+        start_time = end_time - timedelta(hours=24)
+    elif time_range == '48hours':
+        start_time = end_time - timedelta(hours=48)
+    elif time_range == '1week':
+        start_time = end_time - timedelta(weeks=1)
+    elif time_range == '1month':
+        start_time = end_time - timedelta(weeks=4)
+
+    # Query the database for records within the specified time range
+    records = DataSensor.query.filter(DataSensor.timestamp >= start_time, DataSensor.timestamp <= end_time).all()
+
+    # Calculate average values
+    average_values = {}
+    for record in records:
+        timestamp_str = record.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        if timestamp_str not in average_values:
+            average_values[timestamp_str] = [record.value]
+        else:
+            average_values[timestamp_str].append(record.value)
+
+    # Calculate the average for each timestamp
+    average_values = {k: sum(v) / len(v) for k, v in average_values.items()}
+    
+    # Convert to DataFrame for plotting
+    df = pd.DataFrame(list(average_values.items()), columns=['Timestamp', 'AverageValue'])
+    
+    return df
+
+
+@app.route('/graphs/<time_range>', methods=['GET'])
+def show_graph(time_range):
+    df = get_average_values_by_time_range(time_range)
+    
+    fig = go.Figure([go.Scatter(x=df['Timestamp'], y=df['AverageValue'], mode='lines')])
+    fig.update_layout(title=f'Average Values for {time_range.capitalize()}')
+    
+    graph_html = fig.to_html(full_html=False)
+    
+    return render_template('graph.html', graph=graph_html)
+
 
 
 
