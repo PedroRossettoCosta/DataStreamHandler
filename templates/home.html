@@ -2,19 +2,80 @@
 <html>
 <head>
     <title>Home</title>
+    <style>
+        /* Center align the content */
+        body {
+            text-align: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Style for the welcome message container */
+        .welcome-container {
+            display: block;
+            border: 2px solid #333; /* Blue border */
+            padding: 20px; /* Padding inside the container */
+            margin-top: 50px; /* Margin at the top */
+            margin-bottom: 20px; /* Margin at the bottom */
+            max-width: 45%; /* Limit the maximum width of the container */
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #f2f2f2;
+            border-radius: 15px;
+        }
+
+        /* Style for the buttons container */
+        .buttons-container {
+            display: block;
+            border: 2px solid #333; /* Blue border */
+            padding: 20px; /* Padding inside the container */
+            max-width: 45%; /* Limit the maximum width of the container */
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+        }
+
+        /* Style for the buttons */
+        button {
+            display: block;
+            margin: 10px auto; /* Center align the buttons */
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .buttons-container button {
+            display: block;
+            margin: 10px auto; /* Center align the buttons */
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 15px; /* Rounded corners */
+            border: none; /* Remove default button border */
+            background-color: #555555; /* Button background color */
+            color: #ffffff; /* Text color */
+        }
+
+        .buttons-container button:hover {
+            background-color: #292929; /* Darker background color on hover */
+        }
+
+
+        /* Increase font size for the welcoming message */
+        h1 {
+            font-size: 24px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the Home Screen</h1>
+    <div class="welcome-container">
+        <h1>Data Stream Handler</h1>
+    </div>
 
-    <div>
+    <div class="buttons-container">
         <button onclick="window.location.href='/add_csv_data'">Upload CSV</button>
-    </div>
-
-    <div>
         <button onclick="window.location.href='/find_null_values'">Null Values Found</button>
-    </div>
-
-    <div>
         <button onclick="window.location.href='/graficos'">Graphs</button>
     </div>
 </body>

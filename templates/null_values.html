@@ -2,9 +2,72 @@
 <html>
 <head>
     <title>Null Values</title>
+    <style>
+        /* Center align the content */
+        body {
+            text-align: center; /* Center align the text */
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Style for the header */
+        .header {
+            background-color: #e0e0e0; 
+            color: #000000; 
+            padding: 10px; /* Padding around header text */
+            text-align: center; /* Center align header text */
+            position: relative;
+        }
+
+        /* Style for the back button */
+        .back-button {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #353535; 
+            color: #e0e0e0; 
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        /* Style for the table */
+        table {
+            width: 80%; /* Adjust the width as needed */
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-left: auto; /* Auto margin to center the table */
+            margin-right: auto; /* Auto margin to center the table */
+            border: 2px solid black;
+        }
+
+        /* Style for table headers */
+        th {
+            background-color: #f2f2f2; /* Light gray background */
+            color: #333; /* Dark gray text */
+            padding: 10px; /* Padding around header text */
+            text-align: center; /* Center align header text */
+        }
+
+        /* Style for table data */
+        td {
+            padding: 8px; /* Padding around data */
+            text-align: center; /* Center align data */
+        }
+
+        /* Increase font size for headings */
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px; /* Add some margin below the heading */
+        }
+    </style>
 </head>
 <body>
-    <h1>Null Values</h1>
+    <div class="header">
+        <button class="back-button" onclick="window.history.back()">Back</button>
+        <h1>Null Values</h1>
+    </div>
     <table border="1">
         <thead>
             <tr>

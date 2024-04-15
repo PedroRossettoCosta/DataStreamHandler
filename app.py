@@ -41,7 +41,6 @@ def add_data():
     # successfully to the database
     return jsonify({'message': 'Data added successfully'}), 201 # Responds with 201 status code (Created) to indicate successful creation of a new resource
 
-import csv
 
 @app.route('/add_csv_data', methods=['GET', 'POST'])
 def add_csv_data():
