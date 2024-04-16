@@ -139,7 +139,7 @@ def get_average_values_by_time_range(time_range):
     elif time_range == '1month':
         start_time = end_time - timedelta(weeks=4)
 
-    # Query the database for records within the specified time range
+   # Query the database for records within the specified time range
     records = DataSensor.query.filter(DataSensor.timestamp >= start_time, DataSensor.timestamp <= end_time).all()
 
     # Calculate average values
@@ -151,14 +151,20 @@ def get_average_values_by_time_range(time_range):
         else:
             average_values[timestamp_str].append(record.value)
 
+    # Exclude None values from the lists
+    average_values = {k: [v for v in vs if v is not None] for k, vs in average_values.items()}
+
     # Calculate the average for each timestamp
-    average_values = {k: sum(v) / len(v) for k, v in average_values.items()}
+    average_values = {k: sum(v) / len(v) if v else None for k, v in average_values.items()}
+
+    # Remove None values from the dictionary
+    average_values = {k: v for k, v in average_values.items() if v is not None}
 
     # Convert to DataFrame for plotting
     df = pd.DataFrame(list(average_values.items()), columns=['Timestamp', 'AverageValue'])
     
     # Calculate overall average
-    overall_average = round(df['AverageValue'].mean(),2)
+    overall_average = round(df['AverageValue'].mean(), 2)
 
     return df, overall_average
 
@@ -171,14 +177,16 @@ def show_graph(time_range):
     aggregated_df = df.groupby('Timestamp')['AverageValue'].sum().reset_index()
     
     # Create bar chart
-    fig = go.Figure(data=[go.Bar(x=aggregated_df['Timestamp'], y=aggregated_df['AverageValue'])])
+    fig = go.Figure(data=[go.Bar(x=aggregated_df['Timestamp'], y=aggregated_df['AverageValue'],marker=dict(color='yellow',line=dict(color='blue',width=2)))])
     
     fig.update_layout(
         title=f'Total Values for {time_range.capitalize()}',
         xaxis_title='Timestamp',
         yaxis_title='Total Value',
         bargap=0.1,
-        bargroupgap=0.1
+        bargroupgap=0.1,
+        plot_bgcolor ='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
 
     graph_html = fig.to_html(full_html=False)
