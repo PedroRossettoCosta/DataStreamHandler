@@ -5,6 +5,7 @@ import pandas as pd
 import webbrowser
 import os
 import plotly.graph_objs as go
+import subprocess
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:pC1596321471307!@localhost/dbDataStreamHandler'
@@ -22,7 +23,8 @@ def add_data():
     # These next lines extract specific data fields from the JSON data received in the request
     equipmentId = data['equipmentId']
     timestamp = data['timestamp']
-    timestamp = datetime.strptime(data['timestamp'], "%Y-%m-%dT%H:%M:%S.%f%z")
+    timestamp = datetime.strptime(data['timestamp'], "%Y-%m-%dT%H:%M:%S")
+
 
      #fazer tratamento para poder receber valor nulo
     if 'value' in data and data['value'] is not None:
@@ -99,7 +101,7 @@ def update_database_from_csv(csv_data):
 
     db.session.commit()
     
-    return "foi caralho porra de merda de trabalho filho da puta sem mae fudido"
+    return "The database has been successfully updated using the CSV file"
 
     
 
@@ -151,28 +153,43 @@ def get_average_values_by_time_range(time_range):
 
     # Calculate the average for each timestamp
     average_values = {k: sum(v) / len(v) for k, v in average_values.items()}
-    
+
     # Convert to DataFrame for plotting
     df = pd.DataFrame(list(average_values.items()), columns=['Timestamp', 'AverageValue'])
     
-    return df
+    # Calculate overall average
+    overall_average = round(df['AverageValue'].mean(),2)
+
+    return df, overall_average
 
 
 @app.route('/graphs/<time_range>', methods=['GET'])
 def show_graph(time_range):
-    df = get_average_values_by_time_range(time_range)
+    df, overall_average = get_average_values_by_time_range(time_range)
     
-    fig = go.Figure([go.Scatter(x=df['Timestamp'], y=df['AverageValue'], mode='lines')])
-    fig.update_layout(title=f'Average Values for {time_range.capitalize()}')
+    # Aggregate average values by timestamp
+    aggregated_df = df.groupby('Timestamp')['AverageValue'].sum().reset_index()
     
-    graph_html = fig.to_html(full_html=False)
+    # Create bar chart
+    fig = go.Figure(data=[go.Bar(x=aggregated_df['Timestamp'], y=aggregated_df['AverageValue'])])
     
-    return render_template('graph.html', graph=graph_html)
+    fig.update_layout(
+        title=f'Total Values for {time_range.capitalize()}',
+        xaxis_title='Timestamp',
+        yaxis_title='Total Value',
+        bargap=0.1,
+        bargroupgap=0.1
+    )
 
+    graph_html = fig.to_html(full_html=False)
+
+    return render_template('graph.html', graph=graph_html, overall_average=overall_average)
 
 
 
 if __name__ == '__main__':
+
+    subprocess.Popen(['python','computer_simulator.py'])
      #Iniciando o servidor
     if not os.environ.get("WERKZEUG_RUN_MAIN"): #Executa apenas uma vez
         webbrowser.open("http://127.0.0.1:5000/")
