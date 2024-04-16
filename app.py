@@ -70,27 +70,15 @@ def add_csv_data():
 
 def update_database_from_csv(csv_data):
 
-    print("Processing CSV Data:")
-    print(csv_data)
-
    # Query the database for records with matching equipmentId and null value
     records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
    
     null_ids = {(record.equipmentId):record for record in records}
-    
-    print("records:")
-    print(records)
-
-    print("equipment:")
-    print(null_ids)
-
-    print()
 
     for _, row in csv_data.iterrows():
         equipmentId = row['equipmentId']
         value = float(row['value'])
 
-        print(f"Processing equipmentId: {equipmentId}, value: {value}")
 
         if equipmentId in null_ids:
             record = null_ids[(equipmentId)]
@@ -121,7 +109,7 @@ def find_null_values():
         for record in null_value_records
     ]
     
-    # Print the null values to the terminal
+    
     return render_template('null_values.html', null_values=null_value_records_dict)
 
 @app.route('/graphs', methods=['GET','POST'])
