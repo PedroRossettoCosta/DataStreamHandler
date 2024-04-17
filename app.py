@@ -8,7 +8,7 @@ import plotly.graph_objs as go
 import subprocess
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:pC1596321471307!@localhost/dbDataStreamHandler'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://adm_radix:radix@localhost/dbDataStreamHandler'
 db.init_app(app)
 
 @app.route('/', methods=['GET','POST'])
