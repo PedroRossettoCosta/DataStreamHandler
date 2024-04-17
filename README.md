@@ -9,19 +9,19 @@ then the system will automatically update the database with the correct informat
 ## Required Libraries
 To run this project, it is required that you install the following libraries:
 
-'''bash
+'''python
 pip install flask
 '''
-'''bash
+'''python
 pip install Flask-SQLAlchemy
 '''
-'''bash
+'''python
 pip install pandas
 '''
-'''bash
+'''python
 pip install mysql-connector-python
 '''
-'''bash
+'''python
 pip install plotly
 '''
 ## Database Connection Instructions
@@ -31,14 +31,14 @@ the official MySQL website.
 
 2. If MYSQL is installed in your machine then open you command prompt or terminal and connect to MYSQL through the following command:
 
-'''bash
+'''python
 mysql -u root -p
 '''
 Enter your password when asked to in order to access the database.
 
 3. Following, execute these SQL commands in order to create a new user and grant privileges:
 
-'''bash
+'''python
 CREATE USER IF NOT EXISTS 'adm_radix'@'localhost' IDENTIFIED BY 'radix';
 GRANT ALL PRIVILEGES ON * . * TO 'adm_radix'@'localhost';
 FLUSH PRIVILEGES;
@@ -48,7 +48,7 @@ complete the connection.
 
 4. Now to create the database run the following SQL commands:
 
-'''bash
+'''python
 CREATE SCHEMA IF NOT EXISTS `dbDataStreamHandler` DEFAULT CHARACTER SET utf8;
 USE `dbDataStreamHandler`;
 '''
