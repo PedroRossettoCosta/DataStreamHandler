@@ -11,27 +11,30 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://adm_radix:radix@localhost/dbDataStreamHandler'
 db.init_app(app)
 
+#renders the home page to display the options
 @app.route('/', methods=['GET','POST'])
 def home_screen():
     return render_template('home.html')
 
+#renders when the update with the CSV file is successful
 @app.route('/update_success')
 def update_success():
     return render_template('update_success.html')
 
+#adds JSON data to the database
 @app.route('/add_data', methods=['GET','POST'])
 def add_data():
     # Extracts the JSON data from the request body using Flask
     data = request.json
-    # These next lines extract specific data fields from the JSON data received in the request
+    # These lines extract specific data fields from the JSON data received in the request
     equipmentId = data['equipmentId']
     timestamp = data['timestamp']
     timestamp = datetime.strptime(data['timestamp'], "%Y-%m-%dT%H:%M:%S")
 
 
-     #fazer tratamento para poder receber valor nulo
+     #if statement for the database to accept receiving null values
     if 'value' in data and data['value'] is not None:
-        #If it exists, convert it to float
+        #If it is not None, convert it to float
         value = float(data['value'])
     else:
         # If it doesn't exist or is null, set value to None
@@ -39,6 +42,7 @@ def add_data():
 
     # Creates a new datasensor object with the extracted data and adds it to the dabase session
     new_data = DataSensor(equipmentId=equipmentId, timestamp=timestamp, value=value)
+    #adds the new data to the session
     db.session.add(new_data)
     # Commits the changes to the database
     db.session.commit()
@@ -46,22 +50,25 @@ def add_data():
     # successfully to the database
     return jsonify({'message': 'Data added successfully'}), 201 # Responds with 201 status code (Created) to indicate successful creation of a new resource
 
-
+#verifies the csv file added and run the update database file to send to the database the correct
+#value
 @app.route('/add_csv_data', methods=['GET', 'POST'])
 def add_csv_data():
     if request.method == 'POST':
+        #verifies if a file is added
         if 'file' not in request.files:
             return jsonify({'error': 'No file part'}), 400
 
         file = request.files['file']
-        
+        #verifies if the file added has a name
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
-
+        #verifies if the file is indeed a csv file
         if file and file.filename.endswith('.csv'):
-            
+            #utilizes pandas to read the csv file and makes the result of that reading = to csv_data
             csv_data = pd.read_csv(file, sep=',', skipinitialspace=True)
 
+            #uses the update database function to go into the database and change the correct values
             update_database_from_csv(csv_data)
             
             return redirect('/update_success')
@@ -71,36 +78,37 @@ def add_csv_data():
     elif request.method == 'GET':
         return render_template('upload_csv.html')
 
+# A support function for the add_csv_data that does the updating of the database
 def update_database_from_csv(csv_data):
 
    # Query the database for records with matching equipmentId and null value
     records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
-   
+   #creates a dictionary with equipmentId as the keys along the record
     null_ids = {(record.equipmentId):record for record in records}
 
+    #iterates over the csv_data and assigns the data to the variables
     for _, row in csv_data.iterrows():
         equipmentId = row['equipmentId']
         value = float(row['value'])
 
-
+        #if the variable is in the null_ids dictionary, it will updated the value 
+        #that was initially null
         if equipmentId in null_ids:
             record = null_ids[(equipmentId)]
-            print(f"Updating record with equipmentId: {equipmentId} to value: {value}")
             record.value = value
         else:
             print(f"No matching record found for equipmentId: {equipmentId}")
-
+    #commits the updated data to the database
     db.session.commit()
     
     return "The database has been successfully updated using the CSV file"
 
-    
-
-
+#finding the null values in the database
 @app.route('/find_null_values', methods=['GET'])
 def find_null_values():
-        # Query the database for records where the 'value' field is null
+    # Query the database for records where the 'value' field is null
     null_value_records = DataSensor.query.filter(DataSensor.value.is_(None)).all()
+
 
     null_value_records_dict = [
         {
@@ -115,10 +123,12 @@ def find_null_values():
     
     return render_template('null_values.html', null_values=null_value_records_dict)
 
+#renders the page where you choose what time frame average you want
 @app.route('/graphs', methods=['GET','POST'])
 def graphs():
     return render_template('graphs.html')
 
+#mean calculation to find out the average values in the database for the time range specified
 def get_average_values_by_time_range(time_range):
     end_time = datetime.now()
     if time_range == '24hours':
@@ -142,16 +152,16 @@ def get_average_values_by_time_range(time_range):
         else:
             average_values[timestamp_str].append(record.value)
 
-    # Exclude None values from the lists
+    #excludes None values from the lists
     average_values = {k: [v for v in vs if v is not None] for k, vs in average_values.items()}
 
-    # Calculate the average for each timestamp
+    #calculates the average for each timestamp
     average_values = {k: sum(v) / len(v) if v else None for k, v in average_values.items()}
 
-    # Remove None values from the dictionary
+    #removes None values from the dictionary
     average_values = {k: v for k, v in average_values.items() if v is not None}
 
-    # Convert to DataFrame for plotting
+    #converts to DataFrame for plotting
     df = pd.DataFrame(list(average_values.items()), columns=['Timestamp', 'AverageValue'])
     
     # Calculate overall average
@@ -159,7 +169,7 @@ def get_average_values_by_time_range(time_range):
 
     return df, overall_average
 
-
+#using plotly to make the graph
 @app.route('/graphs/<time_range>', methods=['GET'])
 def show_graph(time_range):
     df, overall_average = get_average_values_by_time_range(time_range)
@@ -187,10 +197,10 @@ def show_graph(time_range):
 
 
 if __name__ == '__main__':
-
+    #runs the computer simulator when this file is runned
     subprocess.Popen(['python','computer_simulator.py'])
-     #Iniciando o servidor
-    if not os.environ.get("WERKZEUG_RUN_MAIN"): #Executa apenas uma vez
+     #Starting the server
+    if not os.environ.get("WERKZEUG_RUN_MAIN"): #only executes one time
         webbrowser.open("http://127.0.0.1:5000/")
 
     app.run(debug=False)

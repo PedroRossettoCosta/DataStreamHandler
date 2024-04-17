@@ -3,21 +3,21 @@ import random
 from datetime import datetime, timedelta
 
 
-# URL of your Flask application
+#URL of your Flask application
 url = 'http://127.0.0.1:5000/add_data'
 
-# Function to generate random JSON files
+#function to generate random JSON files
 def generate_json_file():
     equipmentId = f'EQ-{random.randint(10000, 99999)}'
     
-    # Generate a random timestamp between now and one month ago
+    #generate a random timestamp between now and one month ago
     end_time = datetime.now()
     start_time = end_time - timedelta(days=30)
     
     random_timestamp = start_time + (end_time - start_time) * random.random()
     timestamp = random_timestamp.strftime("%Y-%m-%dT%H:%M:%S%z")
     
-    # Defining a probability to generate None value
+    #defining a probability to generate None value
     if random.random() < 0.1:  # 5% chance
         value = None
     else:
