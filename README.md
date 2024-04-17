@@ -52,4 +52,19 @@ complete the connection.
 CREATE SCHEMA IF NOT EXISTS `dbDataStreamHandler` DEFAULT CHARACTER SET utf8;
 USE `dbDataStreamHandler`;
 ```
-Now you are ready to run the project.
+5. After creating the database, a table must be created using the following SQL commands 
+in your terminal:
+
+```python
+CREATE TABLE DataSensor (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    equipmentId VARCHAR(255) NOT NULL,
+    timestamp DATETIME NOT NULL,
+    value DECIMAL(10, 2)
+);
+```
+After completing this step, you are ready to run the app.py(application).
+
+
+If there are any problems in the creation of the database, use the file´s
+'dbdatastreamhandler.sql' script to create the database. 
