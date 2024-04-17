@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, session
+from flask import Flask, jsonify, request, render_template, redirect
 from database import db, DataSensor
 from datetime import datetime, timedelta
 import pandas as pd
@@ -15,6 +15,9 @@ db.init_app(app)
 def home_screen():
     return render_template('home.html')
 
+@app.route('/update_success')
+def update_success():
+    return render_template('update_success.html')
 
 @app.route('/add_data', methods=['GET','POST'])
 def add_data():
@@ -59,9 +62,9 @@ def add_csv_data():
             
             csv_data = pd.read_csv(file, sep=',', skipinitialspace=True)
 
-            updated_records = update_database_from_csv(csv_data)
+            update_database_from_csv(csv_data)
             
-            return jsonify({'message': 'CSV data processed successfully', 'updated_records': updated_records}), 200
+            return redirect('/update_success')
         else:
             return jsonify({'error': 'Invalid file format, only CSV files are accepted'}), 400
 
