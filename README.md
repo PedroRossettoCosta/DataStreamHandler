@@ -11,19 +11,19 @@ To run this project, it is required that you install the following libraries:
 
 '''bash
 pip install flask
-
+'''
 '''bash
 pip install Flask-SQLAlchemy
-
+'''
 '''bash
 pip install pandas
-
+'''
 '''bash
 pip install mysql-connector-python
-
+'''
 '''bash
 pip install plotly
-
+'''
 ## Database Connection Instructions
 
 1. Make sure that you have MYSQL installed in your machine. If needed it can be downloaded at 
@@ -33,7 +33,7 @@ the official MySQL website.
 
 '''bash
 mysql -u root -p
-
+'''
 Enter your password when asked to in order to access the database.
 
 3. Following, execute these SQL commands in order to create a new user and grant privileges:
@@ -42,7 +42,7 @@ Enter your password when asked to in order to access the database.
 CREATE USER IF NOT EXISTS 'adm_radix'@'localhost' IDENTIFIED BY 'radix';
 GRANT ALL PRIVILEGES ON * . * TO 'adm_radix'@'localhost';
 FLUSH PRIVILEGES;
-
+'''
 After running these commands, you will have established a user to
 complete the connection.
 
@@ -51,5 +51,5 @@ complete the connection.
 '''bash
 CREATE SCHEMA IF NOT EXISTS `dbDataStreamHandler` DEFAULT CHARACTER SET utf8;
 USE `dbDataStreamHandler`;
-
+'''
 Now you are ready to run the project.
